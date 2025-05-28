@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Добавить рабочий день</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header><h1>Добавить рабочий день</h1></header>
+  <main>
+    <form id="workDayForm">
+      <label for="date">Дата (ДД.ММ.ГГГГ):</label>
+      <input type="text" id="date" name="date" placeholder="например, 28.05.2025" required pattern="\d{2}\.\d{2}\.\d{4}" />
+
+      <label for="start_time">Время начала (ЧЧ:ММ):</label>
+      <input type="time" id="start_time" name="start_time" value="08:00" required />
+
+      <label for="end_time">Время окончания (ЧЧ:ММ):</label>
+      <input type="time" id="end_time" name="end_time" value="20:00" required />
+
+      <label for="description">Описание дня:</label>
+      <textarea id="description" name="description" rows="4" required></textarea>
+
+      <label for="media">Фото / Видео (можно несколько):</label>
+      <input type="file" id="media" name="media" accept="image/*,video/*" multiple />
+
+      <button type="submit">Сохранить</button>
+    </form>
+
+    <div id="result"></div>
+  </main>
+
+  <script>
+    const form = document.getElementById('workDayForm');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('/api/add_work_day', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          resultDiv.textContent = 'Рабочий день успешно сохранен!';
+          form.reset();
+        } else {
+          resultDiv.textContent = 'Ошибка: ' + data.error;
+        }
+      } catch (err) {
+        resultDiv.textContent = 'Ошибка сети или сервера';
+      }
+    });
+  </script>
+</body>
+</html>
