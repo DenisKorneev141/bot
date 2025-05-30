@@ -2,17 +2,15 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Санта | Новый день</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Санта | Рабочие дни</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
-    
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    
     body {
       background-color: #00a7e0;
       font-family: 'Roboto', Tahoma, sans-serif;
@@ -20,40 +18,62 @@
       padding: 20px;
       line-height: 1.6;
     }
-    
     .container {
       max-width: 480px;
       margin: 0 auto;
     }
-    
     .header {
       text-align: center;
       margin-bottom: 25px;
     }
-    
     .header h1 {
-      font-size: 24px;
-      font-weight: 500;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 30px;
     }
-    
+    .nav_buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      gap: 10px;
+    }
+    .nav_btn {
+      flex: 1;
+      background-color: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      text-decoration: none;
+    }
+    .nav_btn:hover {
+      background-color: rgba(255,255,255,0.3);
+    }
+    .nav_btn.active {
+      background-color: white;
+      color: #00a7e0;
+    }
     .form_card {
       background-color: white;
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      color: #333;
     }
-    
     .input_group {
       margin-bottom: 20px;
     }
-    
     label {
       display: block;
       color: #555;
       margin-bottom: 8px;
       font-weight: 500;
     }
-    
     input, textarea {
       width: 100%;
       padding: 12px 15px;
@@ -61,72 +81,69 @@
       border-radius: 8px;
       font-family: inherit;
       font-size: 16px;
+      color: #333;
     }
-    
     textarea {
       min-height: 100px;
       resize: vertical;
     }
-    
     .time_inputs {
       display: flex;
       gap: 10px;
     }
-    
     .time_inputs input {
       flex: 1;
     }
-    
     .radio_group {
       display: flex;
       gap: 15px;
       margin-bottom: 20px;
+      color: #333;
     }
-    
     .radio_option {
       display: flex;
       align-items: center;
     }
-    
     .radio_option input {
       width: auto;
       margin-right: 8px;
     }
-    
-    .radio_option label {
-      margin-bottom: 0;
-      color: #555;
-    }
-    
     .file_upload {
-      margin: 20px 0;
+      margin: 25px 0;
+      position: relative;
     }
-    
     .upload_btn {
-      display: inline-block;
+      display: block;
       background-color: #f0f0f0;
       color: #555;
-      padding: 12px 20px;
+      padding: 15px;
       border-radius: 8px;
       cursor: pointer;
       text-align: center;
-      width: 100%;
-      transition: background-color 0.3s;
+      font-size: 16px;
+      transition: all 0.3s;
+      border: 2px dashed #ccc;
     }
-    
     .upload_btn:hover {
       background-color: #e0e0e0;
+      border-color: #aaa;
     }
-    
+    .file_input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      cursor: pointer;
+    }
     .file_preview {
       margin-top: 15px;
       display: none;
     }
-    
     .file_preview.active {
       display: block;
     }
-    
     .file_item {
       display: flex;
       align-items: center;
@@ -134,27 +151,33 @@
       padding: 10px;
       border-radius: 6px;
       margin-bottom: 8px;
+      color: #333;
     }
-    
     .file_icon {
       margin-right: 10px;
       color: #00a7e0;
+      font-size: 20px;
+      line-height: 1;
     }
-    
     .file_name {
       flex: 1;
-      color: #333;
       font-size: 14px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    
+    .salary_info {
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: #333;
+      font-size: 16px;
+      text-align: right;
+    }
     .submit_btn {
       background-color: #00a7e0;
       color: white;
       border: none;
-      padding: 15px;
+      padding: 16px;
       border-radius: 8px;
       font-size: 18px;
       font-weight: 500;
@@ -162,15 +185,82 @@
       cursor: pointer;
       transition: background-color 0.3s;
     }
-    
     .submit_btn:hover {
       background-color: #0088c0;
     }
     
-    /* Адаптивность */
+    /* Стили для списка дней */
+    .days_list {
+      display: none;
+    }
+    .day_card {
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      color: #333;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .day_header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+    .day_time {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .day_comment {
+      margin-bottom: 15px;
+      white-space: pre-wrap;
+    }
+    .day_media {
+      margin-top: 15px;
+    }
+    .media_item {
+      display: inline-block;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    .delete_btn {
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 15px;
+    }
+    .user_filter {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .user_filter_btn {
+      background-color: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .user_filter_btn.active {
+      background-color: white;
+      color: #00a7e0;
+    }
+    
     @media (max-width: 480px) {
       body {
         padding: 15px;
+      }
+      .header h1 {
+        font-size: 28px;
       }
     }
   </style>
@@ -178,106 +268,323 @@
 <body>
 <div class="container">
   <div class="header">
-    <h1>Добавить рабочий день</h1>
+    <h1 id="pageTitle">Добавить рабочий день</h1>
   </div>
   
-  <div class="form_card">
+  <div class="nav_buttons">
+    <a href="#" class="nav_btn" id="allDaysBtn">Все дни</a>
+    <a href="#" class="nav_btn active" id="newDayBtn">Новый день</a>
+    <a href="#" class="nav_btn" id="settingsBtn">Настройки</a>
+  </div>
+  
+  <!-- Форма добавления нового дня -->
+  <div class="form_card" id="newDayForm">
     <form id="dayForm">
       <div class="radio_group">
         <div class="radio_option">
-          <input type="radio" id="denis" name="user" value="Денис" checked>
+          <input type="radio" id="denis" name="user" value="Денис" checked />
           <label for="denis">Денис</label>
         </div>
         <div class="radio_option">
-          <input type="radio" id="polina" name="user" value="Полина">
+          <input type="radio" id="polina" name="user" value="Полина" />
           <label for="polina">Полина</label>
         </div>
       </div>
-      
       <div class="input_group">
         <label for="date">Дата</label>
-        <input type="date" id="date" required>
+        <input type="date" id="date" required />
       </div>
-      
       <div class="input_group">
         <label>Время работы</label>
         <div class="time_inputs">
-          <input type="time" id="start_time" value="08:00" required>
-          <input type="time" id="end_time" value="20:00" required>
+          <input type="time" id="start_time" value="08:00" required />
+          <input type="time" id="end_time" value="20:00" required />
         </div>
       </div>
-      
       <div class="input_group">
         <label for="comment">Комментарий ко дню</label>
         <textarea id="comment" placeholder="Опишите ваш день..."></textarea>
       </div>
-      
       <div class="file_upload">
-        <label for="media" class="upload_btn">+ Прикрепить фото/видео</label>
-        <input type="file" id="media" accept="image/*,video/*" multiple>
-        
-        <div class="file_preview" id="filePreview">
-          <!-- Здесь будут отображаться загруженные файлы -->
-        </div>
+        <label class="upload_btn" for="media">+ Прикрепить фото/видео</label>
+        <input type="file" id="media" class="file_input" accept="image/*,video/*" multiple />
+        <div class="file_preview" id="filePreview"></div>
       </div>
-      
+      <div class="salary_info" id="salaryInfo">Зарплата: 0.00 руб.</div>
       <button type="submit" class="submit_btn">Сохранить</button>
     </form>
   </div>
+  
+  <!-- Список всех дней -->
+  <div class="days_list" id="daysList">
+    <div class="user_filter">
+      <button class="user_filter_btn active" data-user="all">Все</button>
+      <button class="user_filter_btn" data-user="Денис">Денис</button>
+      <button class="user_filter_btn" data-user="Полина">Полина</button>
+    </div>
+    <div id="daysContainer">
+      <!-- Дни будут добавляться сюда -->
+    </div>
+  </div>
 </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Установка сегодняшней даты по умолчанию
-    const today = new Date();
-    const dateInput = document.getElementById('date');
-    dateInput.valueAsDate = today;
-    
-    // Обработка загрузки файлов
-    const fileInput = document.getElementById('media');
-    const filePreview = document.getElementById('filePreview');
-    
-    fileInput.addEventListener('change', function() {
-      filePreview.innerHTML = '';
-      
-      if (this.files.length > 0) {
-        filePreview.classList.add('active');
-        
-        for (let i = 0; i < this.files.length; i++) {
-          const file = this.files[i];
-          const fileType = file.type.split('/')[0];
-          
-          const fileItem = document.createElement('div');
-          fileItem.className = 'file_item';
-          
-          const icon = document.createElement('span');
-          icon.className = 'file_icon';
-          icon.innerHTML = fileType === 'image' ? '📷' : '🎥';
-          
-          const fileName = document.createElement('span');
-          fileName.className = 'file_name';
-          fileName.textContent = file.name;
-          
-          fileItem.appendChild(icon);
-          fileItem.appendChild(fileName);
-          filePreview.appendChild(fileItem);
-        }
-      } else {
-        filePreview.classList.remove('active');
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+  import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    getDocs,
+    deleteDoc,
+    doc,
+    query,
+    where,
+    serverTimestamp 
+  } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCd2Y3GhHKtibLrqipERwf5vMrCSNLFl60",
+    authDomain: "santa-diary.firebaseapp.com",
+    projectId: "santa-diary",
+    storageBucket: "santa-diary.appspot.com",
+    messagingSenderId: "193506574944",
+    appId: "1:193506574944:web:23e0282d5129f2f793c7a7",
+    measurementId: "G-GTPJ66CWH0"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+
+  // DOM элементы
+  const form = document.getElementById('dayForm');
+  const salaryInfo = document.getElementById('salaryInfo');
+  const mediaInput = document.getElementById('media');
+  const filePreview = document.getElementById('filePreview');
+  const newDayForm = document.getElementById('newDayForm');
+  const daysList = document.getElementById('daysList');
+  const daysContainer = document.getElementById('daysContainer');
+  const pageTitle = document.getElementById('pageTitle');
+  const allDaysBtn = document.getElementById('allDaysBtn');
+  const newDayBtn = document.getElementById('newDayBtn');
+  const userFilterBtns = document.querySelectorAll('.user_filter_btn');
+
+  // Переключение между вкладками
+  allDaysBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    newDayForm.style.display = 'none';
+    daysList.style.display = 'block';
+    pageTitle.textContent = 'Все рабочие дни';
+    updateActiveNavBtn(allDaysBtn);
+    loadDays();
+  });
+
+  newDayBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    newDayForm.style.display = 'block';
+    daysList.style.display = 'none';
+    pageTitle.textContent = 'Добавить рабочий день';
+    updateActiveNavBtn(newDayBtn);
+  });
+
+  function updateActiveNavBtn(activeBtn) {
+    document.querySelectorAll('.nav_btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    activeBtn.classList.add('active');
+  }
+
+  // Автоматическая установка сегодняшней даты
+  const dateInput = document.getElementById('date');
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  dateInput.value = `${yyyy}-${mm}-${dd}`;
+
+  // Расчет зарплаты
+  function updateSalary() {
+    const start = form.querySelector('#start_time').value;
+    const end = form.querySelector('#end_time').value;
+    if (start && end) {
+      const startDate = new Date(`1970-01-01T${start}:00`);
+      const endDate = new Date(`1970-01-01T${end}:00`);
+      let diff = (endDate - startDate) / (1000 * 60 * 60);
+      if (diff < 0) diff = 0;
+      const salary = (diff * 8.4 - 8.4).toFixed(2);
+      salaryInfo.textContent = `Зарплата: ${salary} руб.`;
+      return parseFloat(salary);
+    }
+    salaryInfo.textContent = `Зарплата: 0.00 руб.`;
+    return 0;
+  }
+
+  form.querySelector('#start_time').addEventListener('change', updateSalary);
+  form.querySelector('#end_time').addEventListener('change', updateSalary);
+
+  // Превью загружаемых файлов
+  mediaInput.addEventListener('change', () => {
+    filePreview.innerHTML = '';
+    if (mediaInput.files.length > 0) {
+      filePreview.classList.add('active');
+      Array.from(mediaInput.files).forEach(file => {
+        const div = document.createElement('div');
+        div.className = 'file_item';
+        div.innerHTML = `<span class="file_icon">📎</span><span class="file_name">${file.name}</span>`;
+        filePreview.appendChild(div);
+      });
+    } else {
+      filePreview.classList.remove('active');
+    }
+  });
+
+  // Отправка формы
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const user = form.querySelector('input[name="user"]:checked').value;
+    const date = form.querySelector('#date').value;
+    const startTime = form.querySelector('#start_time').value;
+    const endTime = form.querySelector('#end_time').value;
+    const comment = form.querySelector('#comment').value;
+    const salary = updateSalary();
+
+    const files = mediaInput.files;
+    let mediaFiles = [];
+    if (files.length > 0) {
+      for (const f of files) {
+        mediaFiles.push(f.name);
       }
+    }
+
+    try {
+      await addDoc(collection(db, "workingDays"), {
+        user: user,
+        date: date,
+        startTime: startTime,
+        endTime: endTime,
+        comment: comment,
+        salary: salary,
+        mediaFiles: mediaFiles,
+        timestamp: serverTimestamp()
+      });
+      alert('Данные успешно сохранены!');
+      form.reset();
+      filePreview.innerHTML = '';
+      filePreview.classList.remove('active');
+      salaryInfo.textContent = `Зарплата: 0.00 руб.`;
+      dateInput.value = `${yyyy}-${mm}-${dd}`;
+    } catch (error) {
+      alert('Ошибка при сохранении данных: ' + error.message);
+    }
+  });
+
+  // Загрузка и отображение дней
+  async function loadDays(user = 'all') {
+    daysContainer.innerHTML = '<p>Загрузка...</p>';
+    
+    let q;
+    if (user === 'all') {
+      q = query(collection(db, "workingDays"));
+    } else {
+      q = query(collection(db, "workingDays"), where("user", "==", user));
+    }
+    
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      daysContainer.innerHTML = '<p>Нет сохраненных дней</p>';
+      return;
+    }
+    
+    daysContainer.innerHTML = '';
+    
+    const days = [];
+    querySnapshot.forEach((docSnapshot) => {
+      days.push({
+        id: docSnapshot.id,
+        ...docSnapshot.data()
+      });
     });
     
-    // Обработка формы
-    document.getElementById('dayForm').addEventListener('submit', function(e) {
-      e.preventDefault();
+    // Сортировка по дате (новые сверху)
+    days.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    days.forEach(day => {
+      const dayCard = document.createElement('div');
+      dayCard.className = 'day_card';
+      dayCard.dataset.user = day.user;
       
-      // Получаем выбранного пользователя
-      const selectedUser = document.querySelector('input[name="user"]:checked').value;
+      let mediaHTML = '';
+      if (day.mediaFiles && day.mediaFiles.length > 0) {
+        mediaHTML = `
+          <div class="day_media">
+            <p>Прикрепленные файлы:</p>
+            ${day.mediaFiles.map(file => 
+              `<div class="media_item">📎 ${file}</div>`
+            ).join('')}
+          </div>
+        `;
+      }
       
-      alert(`Рабочий день для ${selectedUser} успешно сохранён!`);
-      // Здесь можно добавить обработку данных формы
+      dayCard.innerHTML = `
+        <div class="day_header">
+          <span>${day.user}</span>
+          <span>${formatDate(day.date)}</span>
+        </div>
+        <div class="day_time">
+          Время работы: ${day.startTime} - ${day.endTime}
+        </div>
+        <div class="day_comment">
+          ${day.comment || 'Нет комментария'}
+        </div>
+        ${mediaHTML}
+        <div class="salary_info">
+          Зарплата: ${day.salary || '0.00'} руб.
+        </div>
+        <button class="delete_btn" data-id="${day.id}">Удалить</button>
+      `;
+      
+      daysContainer.appendChild(dayCard);
+    });
+    
+    // Добавляем обработчики для кнопок удаления
+    document.querySelectorAll('.delete_btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (confirm('Вы уверены, что хотите удалить этот день?')) {
+          try {
+            await deleteDoc(doc(db, "workingDays", btn.dataset.id));
+            btn.parentElement.remove();
+          } catch (error) {
+            alert('Ошибка при удалении: ' + error.message);
+          }
+        }
+      });
+    });
+  }
+
+  // Форматирование даты
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  }
+
+  // Фильтрация по пользователю
+  userFilterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      userFilterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadDays(btn.dataset.user);
     });
   });
+
+  // Инициализация
+  updateSalary();
 </script>
 </body>
 </html>
