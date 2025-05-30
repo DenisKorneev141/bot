@@ -2,23 +2,282 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Рабочий Бот</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Санта | Новый день</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background-color: #00a7e0;
+      font-family: 'Roboto', Tahoma, sans-serif;
+      color: white;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      font-weight: 500;
+    }
+    
+    .form_card {
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .input_group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      color: #555;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    input, textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 16px;
+    }
+    
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .time_inputs {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .time_inputs input {
+      flex: 1;
+    }
+    
+    .radio_group {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .radio_option {
+      display: flex;
+      align-items: center;
+    }
+    
+    .radio_option input {
+      width: auto;
+      margin-right: 8px;
+    }
+    
+    .radio_option label {
+      margin-bottom: 0;
+      color: #555;
+    }
+    
+    .file_upload {
+      margin: 20px 0;
+    }
+    
+    .upload_btn {
+      display: inline-block;
+      background-color: #f0f0f0;
+      color: #555;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+    
+    .upload_btn:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .file_preview {
+      margin-top: 15px;
+      display: none;
+    }
+    
+    .file_preview.active {
+      display: block;
+    }
+    
+    .file_item {
+      display: flex;
+      align-items: center;
+      background-color: #f8f8f8;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    
+    .file_icon {
+      margin-right: 10px;
+      color: #00a7e0;
+    }
+    
+    .file_name {
+      flex: 1;
+      color: #333;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .submit_btn {
+      background-color: #00a7e0;
+      color: white;
+      border: none;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 500;
+      width: 100%;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .submit_btn:hover {
+      background-color: #0088c0;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 480px) {
+      body {
+        padding: 15px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>Рабочий бот - Веб-интерфейс</h1>
-  </header>
-  <nav>
-    <ul class="menu">
-      <li><a href="add_work_day.html">Добавить рабочий день</a></li>
-      <li><a href="all_days.html">Все дни</a></li>
-      <li><a href="statistics.html">Статистика</a></li>
-      <li><a href="meetings.html">Совещания</a></li>
-    </ul>
-  </nav>
-  <main>
-    <p>Добро пожаловать! Выберите действие из меню.</p>
-  </main>
+<div class="container">
+  <div class="header">
+    <h1>Добавить рабочий день</h1>
+  </div>
+  
+  <div class="form_card">
+    <form id="dayForm">
+      <div class="radio_group">
+        <div class="radio_option">
+          <input type="radio" id="denis" name="user" value="Денис" checked>
+          <label for="denis">Денис</label>
+        </div>
+        <div class="radio_option">
+          <input type="radio" id="polina" name="user" value="Полина">
+          <label for="polina">Полина</label>
+        </div>
+      </div>
+      
+      <div class="input_group">
+        <label for="date">Дата</label>
+        <input type="date" id="date" required>
+      </div>
+      
+      <div class="input_group">
+        <label>Время работы</label>
+        <div class="time_inputs">
+          <input type="time" id="start_time" value="08:00" required>
+          <input type="time" id="end_time" value="20:00" required>
+        </div>
+      </div>
+      
+      <div class="input_group">
+        <label for="comment">Комментарий ко дню</label>
+        <textarea id="comment" placeholder="Опишите ваш день..."></textarea>
+      </div>
+      
+      <div class="file_upload">
+        <label for="media" class="upload_btn">+ Прикрепить фото/видео</label>
+        <input type="file" id="media" accept="image/*,video/*" multiple>
+        
+        <div class="file_preview" id="filePreview">
+          <!-- Здесь будут отображаться загруженные файлы -->
+        </div>
+      </div>
+      
+      <button type="submit" class="submit_btn">Сохранить</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Установка сегодняшней даты по умолчанию
+    const today = new Date();
+    const dateInput = document.getElementById('date');
+    dateInput.valueAsDate = today;
+    
+    // Обработка загрузки файлов
+    const fileInput = document.getElementById('media');
+    const filePreview = document.getElementById('filePreview');
+    
+    fileInput.addEventListener('change', function() {
+      filePreview.innerHTML = '';
+      
+      if (this.files.length > 0) {
+        filePreview.classList.add('active');
+        
+        for (let i = 0; i < this.files.length; i++) {
+          const file = this.files[i];
+          const fileType = file.type.split('/')[0];
+          
+          const fileItem = document.createElement('div');
+          fileItem.className = 'file_item';
+          
+          const icon = document.createElement('span');
+          icon.className = 'file_icon';
+          icon.innerHTML = fileType === 'image' ? '📷' : '🎥';
+          
+          const fileName = document.createElement('span');
+          fileName.className = 'file_name';
+          fileName.textContent = file.name;
+          
+          fileItem.appendChild(icon);
+          fileItem.appendChild(fileName);
+          filePreview.appendChild(fileItem);
+        }
+      } else {
+        filePreview.classList.remove('active');
+      }
+    });
+    
+    // Обработка формы
+    document.getElementById('dayForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Получаем выбранного пользователя
+      const selectedUser = document.querySelector('input[name="user"]:checked').value;
+      
+      alert(`Рабочий день для ${selectedUser} успешно сохранён!`);
+      // Здесь можно добавить обработку данных формы
+    });
+  });
+</script>
 </body>
 </html>
