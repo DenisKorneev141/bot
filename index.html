@@ -74,7 +74,7 @@
       margin-bottom: 8px;
       font-weight: 500;
     }
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 12px 15px;
       border: 1px solid #ddd;
@@ -255,6 +255,36 @@
       color: #00a7e0;
     }
     
+    /* Статистика */
+    .stats_container {
+      background-color: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      color: #333;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .stats_header {
+      font-weight: 700;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 18px;
+    }
+    .stats_item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .stats_label {
+      font-weight: 500;
+    }
+    .stats_value {
+      font-weight: 600;
+    }
+    .month_selector {
+      margin-bottom: 15px;
+    }
+    
     @media (max-width: 480px) {
       body {
         padding: 15px;
@@ -322,6 +352,33 @@
       <button class="user_filter_btn" data-user="Денис">Денис</button>
       <button class="user_filter_btn" data-user="Полина">Полина</button>
     </div>
+    
+    <!-- Блок статистики -->
+    <div class="stats_container" id="statsContainer">
+      <div class="stats_header">Статистика за <span id="currentMonthYear"></span></div>
+      <div class="month_selector">
+        <select id="monthSelect">
+          <!-- Месяцы будут добавлены через JS -->
+        </select>
+      </div>
+      <div class="stats_item">
+        <span class="stats_label">Отработано дней:</span>
+        <span class="stats_value" id="daysWorked">0</span>
+      </div>
+      <div class="stats_item">
+        <span class="stats_label">Отработано часов:</span>
+        <span class="stats_value" id="hoursWorked">0</span>
+      </div>
+      <div class="stats_item">
+        <span class="stats_label">Зарплата:</span>
+        <span class="stats_value" id="totalSalary">0.00 руб.</span>
+      </div>
+      <div class="stats_item">
+        <span class="stats_label">Зарплата в договоре:</span>
+        <span class="stats_value" id="contractSalary">0.00 руб.</span>
+      </div>
+    </div>
+    
     <div id="daysContainer">
       <!-- Дни будут добавляться сюда -->
     </div>
@@ -331,16 +388,16 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
-  import { 
-    getFirestore, 
-    collection, 
-    addDoc, 
+  import {
+    getFirestore,
+    collection,
+    addDoc,
     getDocs,
     deleteDoc,
     doc,
     query,
     where,
-    serverTimestamp 
+    serverTimestamp
   } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -352,9 +409,8 @@
     appId: "1:193506574944:web:23e0282d5129f2f793c7a7",
     measurementId: "G-GTPJ66CWH0"
   };
-
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+  getAnalytics(app);
   const db = getFirestore(app);
 
   // DOM элементы
@@ -369,169 +425,291 @@
   const allDaysBtn = document.getElementById('allDaysBtn');
   const newDayBtn = document.getElementById('newDayBtn');
   const userFilterBtns = document.querySelectorAll('.user_filter_btn');
+  const monthSelect = document.getElementById('monthSelect');
+  const currentMonthYear = document.getElementById('currentMonthYear');
+  const daysWorkedEl = document.getElementById('daysWorked');
+  const hoursWorkedEl = document.getElementById('hoursWorked');
+  const totalSalaryEl = document.getElementById('totalSalary');
+  const contractSalaryEl = document.getElementById('contractSalary');
+  const dateInput = document.getElementById('date');
 
-  // Переключение между вкладками
-  allDaysBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    newDayForm.style.display = 'none';
-    daysList.style.display = 'block';
-    pageTitle.textContent = 'Все рабочие дни';
-    updateActiveNavBtn(allDaysBtn);
-    loadDays();
-  });
+  // Стили для медиа-контента
+  const style = document.createElement('style');
+  style.textContent = `
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .media-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #f5f5f5;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .media-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .media-image:hover {
+      transform: scale(1.05);
+    }
+    .media-link {
+      padding: 10px;
+      color: #00a7e0;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .media-video {
+      width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+    }
+  `;
+  document.head.appendChild(style);
 
-  newDayBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    newDayForm.style.display = 'block';
-    daysList.style.display = 'none';
-    pageTitle.textContent = 'Добавить рабочий день';
-    updateActiveNavBtn(newDayBtn);
-  });
-
-  function updateActiveNavBtn(activeBtn) {
-    document.querySelectorAll('.nav_btn').forEach(btn => {
-      btn.classList.remove('active');
-    });
-    activeBtn.classList.add('active');
+  // Утилиты
+  function pad(n) { return String(n).padStart(2, '0'); }
+  
+  function fmtDateInput(d) {
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+  
+  function formatDisplayDate(s) {
+    const d = new Date(s);
+    return d.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', year: 'numeric'});
   }
 
-  // Автоматическая установка сегодняшней даты
-  const dateInput = document.getElementById('date');
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const dd = String(today.getDate()).padStart(2, '0');
-  dateInput.value = `${yyyy}-${mm}-${dd}`;
+  function initMonthSelect() {
+    const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+                   'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    const now = new Date();
+    
+    for(let y = now.getFullYear()-1; y <= now.getFullYear()+1; y++) {
+      for(let m = 0; m < 12; m++) {
+        const opt = document.createElement('option');
+        opt.value = `${y}-${m}`;
+        opt.text = `${months[m]} ${y}`;
+        if(y === now.getFullYear() && m === now.getMonth()) opt.selected = true;
+        monthSelect.append(opt);
+      }
+    }
+    updateCurrentMonthDisplay();
+  }
+  
+  function updateCurrentMonthDisplay() {
+    const [y, m] = monthSelect.value.split('-').map(Number);
+    currentYear = y;
+    currentMonth = m;
+    const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+                   'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+    currentMonthYear.textContent = `${months[m]} ${y}`;
+  }
+
+  // Установка сегодняшней даты по умолчанию
+  dateInput.value = fmtDateInput(new Date());
 
   // Расчет зарплаты
-  function updateSalary() {
-    const start = form.querySelector('#start_time').value;
-    const end = form.querySelector('#end_time').value;
-    if (start && end) {
-      const startDate = new Date(`1970-01-01T${start}:00`);
-      const endDate = new Date(`1970-01-01T${end}:00`);
-      let diff = (endDate - startDate) / (1000 * 60 * 60);
-      if (diff < 0) diff = 0;
-      const salary = (diff * 8.4 - 8.4).toFixed(2);
-      salaryInfo.textContent = `Зарплата: ${salary} руб.`;
-      return parseFloat(salary);
+  function updateFormSalary() {
+    const start = form.start_time.value;
+    const end = form.end_time.value;
+    
+    if(!start || !end) {
+      salaryInfo.textContent = 'Зарплата: 0.00 руб.';
+      return 0;
     }
-    salaryInfo.textContent = `Зарплата: 0.00 руб.`;
-    return 0;
+    
+    const startDate = new Date(`1970-01-01T${start}:00`);
+    const endDate = new Date(`1970-01-01T${end}:00`);
+    let hours = (endDate - startDate) / (1000 * 3600);
+    if(hours < 0) hours = 0;
+    
+    const salary = (hours * 8.4 - 8.4).toFixed(2);
+    salaryInfo.textContent = `Зарплата: ${salary} руб.`;
+    return parseFloat(salary);
   }
 
-  form.querySelector('#start_time').addEventListener('change', updateSalary);
-  form.querySelector('#end_time').addEventListener('change', updateSalary);
+  form.start_time.addEventListener('change', updateFormSalary);
+  form.end_time.addEventListener('change', updateFormSalary);
 
   // Превью загружаемых файлов
   mediaInput.addEventListener('change', () => {
     filePreview.innerHTML = '';
-    if (mediaInput.files.length > 0) {
+    if(mediaInput.files.length) {
       filePreview.classList.add('active');
       Array.from(mediaInput.files).forEach(file => {
-        const div = document.createElement('div');
-        div.className = 'file_item';
-        div.innerHTML = `<span class="file_icon">📎</span><span class="file_name">${file.name}</span>`;
-        filePreview.appendChild(div);
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file_item';
+        fileItem.innerHTML = `
+          <span class="file_icon">📎</span>
+          <span class="file_name">${file.name}</span>
+        `;
+        filePreview.append(fileItem);
       });
     } else {
       filePreview.classList.remove('active');
     }
   });
 
-  // Отправка формы
-  form.addEventListener('submit', async (e) => {
+  // Загрузка файлов на ImgBB
+  async function uploadFileToImgBB(file) {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      const response = await fetch('https://api.imgbb.com/1/upload?key=f615d978ca8fd405d2e746aefcba1637', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await response.json();
+      
+      if(data.status !== 200) {
+        throw new Error(data.error?.message || 'Ошибка загрузки файла');
+      }
+      
+      return data.data.url;
+    } catch (error) {
+      console.error('Ошибка загрузки файла:', error);
+      throw error;
+    }
+  }
+
+  // Обработка отправки формы
+  form.addEventListener('submit', async e => {
     e.preventDefault();
 
     const user = form.querySelector('input[name="user"]:checked').value;
-    const date = form.querySelector('#date').value;
-    const startTime = form.querySelector('#start_time').value;
-    const endTime = form.querySelector('#end_time').value;
-    const comment = form.querySelector('#comment').value;
-    const salary = updateSalary();
-
-    const files = mediaInput.files;
-    let mediaFiles = [];
-    if (files.length > 0) {
-      for (const f of files) {
-        mediaFiles.push(f.name);
-      }
-    }
+    const date = form.date.value;
+    const startTime = form.start_time.value;
+    const endTime = form.end_time.value;
+    const comment = form.comment.value;
+    const salary = updateFormSalary();
 
     try {
-      await addDoc(collection(db, "workingDays"), {
-        user: user,
-        date: date,
-        startTime: startTime,
-        endTime: endTime,
-        comment: comment,
-        salary: salary,
-        mediaFiles: mediaFiles,
+      // Загрузка файлов
+      let mediaLinks = [];
+      if(mediaInput.files.length > 0) {
+        for(const file of mediaInput.files) {
+          const link = await uploadFileToImgBB(file);
+          mediaLinks.push(link);
+        }
+      }
+
+      // Сохранение данных в Firestore
+      await addDoc(collection(db, 'workingDays'), {
+        user,
+        date,
+        startTime,
+        endTime,
+        comment,
+        salary,
+        mediaFiles: mediaLinks,
         timestamp: serverTimestamp()
       });
-      alert('Данные успешно сохранены!');
+
+      alert('День успешно сохранен!');
       form.reset();
       filePreview.innerHTML = '';
       filePreview.classList.remove('active');
-      salaryInfo.textContent = `Зарплата: 0.00 руб.`;
-      dateInput.value = `${yyyy}-${mm}-${dd}`;
+      salaryInfo.textContent = 'Зарплата: 0.00 руб.';
+      dateInput.value = fmtDateInput(new Date());
     } catch (error) {
-      alert('Ошибка при сохранении данных: ' + error.message);
+      alert('Ошибка при сохранении: ' + error.message);
     }
   });
 
+  // Определение типа медиа по URL
+  function getMediaType(url) {
+    if(/\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(url)) return 'image';
+    if(/\.(mp4|webm|ogg|mov)$/i.test(url)) return 'video';
+    return 'other';
+  }
+
   // Загрузка и отображение дней
-  async function loadDays(user = 'all') {
+  async function loadDays() {
     daysContainer.innerHTML = '<p>Загрузка...</p>';
     
-    let q;
-    if (user === 'all') {
-      q = query(collection(db, "workingDays"));
-    } else {
-      q = query(collection(db, "workingDays"), where("user", "==", user));
-    }
+    const startDate = fmtDateInput(new Date(currentYear, currentMonth, 1));
+    const endDate = fmtDateInput(new Date(currentYear, currentMonth + 1, 0));
     
-    const querySnapshot = await getDocs(q);
+    const q = query(
+      collection(db, 'workingDays'),
+      where('date', '>=', startDate),
+      where('date', '<=', endDate)
+    );
     
-    if (querySnapshot.empty) {
-      daysContainer.innerHTML = '<p>Нет сохраненных дней</p>';
+    const snapshot = await getDocs(q);
+    const days = [];
+    snapshot.forEach(doc => days.push({ id: doc.id, ...doc.data() }));
+    
+    // Фильтрация по пользователю
+    const filteredDays = currentUser === 'all' 
+      ? days 
+      : days.filter(day => day.user === currentUser);
+    
+    if(filteredDays.length === 0) {
+      daysContainer.innerHTML = '<p>Нет данных за этот период</p>';
+      updateStats([]);
       return;
     }
     
+    // Сортировка по дате (новые сверху)
+    filteredDays.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
     daysContainer.innerHTML = '';
     
-    const days = [];
-    querySnapshot.forEach((docSnapshot) => {
-      days.push({
-        id: docSnapshot.id,
-        ...docSnapshot.data()
-      });
-    });
-    
-    // Сортировка по дате (новые сверху)
-    days.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    days.forEach(day => {
-      const dayCard = document.createElement('div');
-      dayCard.className = 'day_card';
-      dayCard.dataset.user = day.user;
-      
+    filteredDays.forEach(day => {
       let mediaHTML = '';
-      if (day.mediaFiles && day.mediaFiles.length > 0) {
+      if(day.mediaFiles?.length > 0) {
         mediaHTML = `
           <div class="day_media">
             <p>Прикрепленные файлы:</p>
-            ${day.mediaFiles.map(file => 
-              `<div class="media_item">📎 ${file}</div>`
-            ).join('')}
+            <div class="media-grid">
+              ${day.mediaFiles.map(url => {
+                const type = getMediaType(url);
+                
+                if(type === 'image') {
+                  return `
+                    <div class="media-item">
+                      <img src="${url}" alt="Фото рабочего дня" class="media-image" loading="lazy">
+                    </div>
+                  `;
+                } else if(type === 'video') {
+                  return `
+                    <div class="media-item">
+                      <video controls class="media-video">
+                        <source src="${url}" type="video/mp4">
+                        Ваш браузер не поддерживает видео.
+                      </video>
+                    </div>
+                  `;
+                } else {
+                  return `
+                    <div class="media-item">
+                      <a href="${url}" target="_blank" class="media-link">📁 Скачать файл</a>
+                    </div>
+                  `;
+                }
+              }).join('')}
+            </div>
           </div>
         `;
       }
       
+      const dayCard = document.createElement('div');
+      dayCard.className = 'day_card';
       dayCard.innerHTML = `
         <div class="day_header">
           <span>${day.user}</span>
-          <span>${formatDate(day.date)}</span>
+          <span>${formatDisplayDate(day.date)}</span>
         </div>
         <div class="day_time">
           Время работы: ${day.startTime} - ${day.endTime}
@@ -549,42 +727,94 @@
       daysContainer.appendChild(dayCard);
     });
     
-    // Добавляем обработчики для кнопок удаления
+    // Обработчики для кнопок удаления
     document.querySelectorAll('.delete_btn').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (confirm('Вы уверены, что хотите удалить этот день?')) {
+        if(confirm('Вы уверены, что хотите удалить этот день?')) {
           try {
-            await deleteDoc(doc(db, "workingDays", btn.dataset.id));
+            await deleteDoc(doc(db, 'workingDays', btn.dataset.id));
             btn.parentElement.remove();
+            updateStats();
           } catch (error) {
             alert('Ошибка при удалении: ' + error.message);
           }
         }
       });
     });
+    
+    updateStats(filteredDays);
   }
 
-  // Форматирование даты
-  function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+  // Обновление статистики
+  function updateStats(days = []) {
+    let totalHours = 0;
+    let totalSalary = 0;
+    
+    days.forEach(day => {
+      const start = new Date(`1970-01-01T${day.startTime}:00`);
+      const end = new Date(`1970-01-01T${day.endTime}:00`);
+      let hours = (end - start) / (1000 * 3600);
+      if(hours < 0) hours = 0;
+      
+      totalHours += hours;
+      totalSalary += parseFloat(day.salary || 0);
     });
+    
+    daysWorkedEl.textContent = days.length;
+    hoursWorkedEl.textContent = totalHours.toFixed(1);
+    totalSalaryEl.textContent = `${totalSalary.toFixed(2)} руб.`;
+    contractSalaryEl.textContent = `${(totalSalary / 0.87).toFixed(2)} руб.`;
   }
 
-  // Фильтрация по пользователю
+  // Текущий пользователь и месяц
+  let currentUser = 'all';
+  let currentYear = new Date().getFullYear();
+  let currentMonth = new Date().getMonth();
+
+  // Обработчики событий
+  allDaysBtn.addEventListener('click', e => {
+    e.preventDefault();
+    newDayForm.style.display = 'none';
+    daysList.style.display = 'block';
+    pageTitle.textContent = 'Все рабочие дни';
+    updateActiveNavBtn(allDaysBtn);
+    loadDays();
+  });
+
+  newDayBtn.addEventListener('click', e => {
+    e.preventDefault();
+    newDayForm.style.display = 'block';
+    daysList.style.display = 'none';
+    pageTitle.textContent = 'Добавить рабочий день';
+    updateActiveNavBtn(newDayBtn);
+  });
+
+  function updateActiveNavBtn(activeBtn) {
+    document.querySelectorAll('.nav_btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    activeBtn.classList.add('active');
+  }
+
   userFilterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       userFilterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      loadDays(btn.dataset.user);
+      currentUser = btn.dataset.user;
+      loadDays();
     });
   });
 
+  monthSelect.addEventListener('change', () => {
+    updateCurrentMonthDisplay();
+    loadDays();
+  });
+
   // Инициализация
-  updateSalary();
+  initMonthSelect();
+  loadDays();
 </script>
+
+
 </body>
 </html>
